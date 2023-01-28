@@ -14,10 +14,10 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
-            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <ToolBar>
-            <Button Content="Load" Margin="5" Padding="5"/>
+            <Button Content="Load" Margin="5" Padding="5" Command="{Binding LoadCommand}"/>
             <Button Content="Save" Margin="5" Padding="5"/>
             <Separator/>
             <Button Content="New" Margin="5" Padding="5"/>
@@ -25,14 +25,30 @@
             <Button Content="Delete" Margin="5" Padding="5"/>
         </ToolBar>
         <ToolBar Grid.Column="1">
+            <Button Content="Start" Margin="5" Padding="5" Command="{Binding StartCommand}"/>
             <Button Content="Save" Margin="5" Padding="5"/>
         </ToolBar>
-        <ListBox Grid.Row="2" >
-        </ListBox>
-        <ListView Grid.Column="1" Grid.RowSpan="2" Grid.Row="1">
+        <ListView Grid.Row="2" ItemsSource="{Binding PublicLog}" >
             <ListView.View>
                 <GridView>
-                    <GridViewColumn/>
+                    <GridView.Columns>
+                        <GridViewColumn Header="Time" DisplayMemberBinding="{Binding Time}" Width="auto"/>
+                        <GridViewColumn Header="Server" DisplayMemberBinding="{Binding Server}" Width="auto"/>
+                        <GridViewColumn Header="Ports" DisplayMemberBinding="{Binding Port}" Width="auto"/>
+                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message}" Width="auto"/>
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <ListView Grid.Column="1" Grid.RowSpan="2" Grid.Row="1" ItemsSource="{Binding SuccessLog}" >
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn Header="Time" DisplayMemberBinding="{Binding Time}" Width="auto"/>
+                        <GridViewColumn Header="Server" DisplayMemberBinding="{Binding Server}" Width="auto"/>
+                        <GridViewColumn Header="Ports" DisplayMemberBinding="{Binding Port}" Width="auto"/>
+                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Message}" Width="auto"/>
+                    </GridView.Columns>
                 </GridView>
             </ListView.View>
         </ListView>

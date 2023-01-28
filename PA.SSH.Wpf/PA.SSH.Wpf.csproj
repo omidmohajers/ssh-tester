@@ -38,6 +38,10 @@
     <Reference Include="Prism, Version=8.1.97.5141, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
       <HintPath>..\PA.SSH\packages\Prism.Core.8.1.97\lib\net47\Prism.dll</HintPath>
     </Reference>
+    <Reference Include="Renci.SshNet, Version=2020.0.2.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\PA.SSH\bin\Debug\Renci.SshNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />

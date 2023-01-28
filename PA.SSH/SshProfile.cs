@@ -39,7 +39,7 @@ namespace PA.SSH
         }
         public void ParsePortsString()
         {
-            string[] prts = PortsString.Split(',');
+            string[] prts = PortsString.Split(':');
             Ports = new ushort[prts.Length];
             if (prts != null && prts.Length > 0)
                 for (int i = 0; i < prts.Length; i++)
@@ -66,7 +66,8 @@ namespace PA.SSH
             this.Server = string.IsNullOrWhiteSpace(data[0]) ? "0.0.0.0" : data[1];
             this.Username = string.IsNullOrWhiteSpace(data[2]) ? "0.0.0.0" : data[2];
             this.Password = string.IsNullOrWhiteSpace(data[3]) ? "0.0.0.0" : data[3];
-            //this.PortsString = string.IsNullOrWhiteSpace(data[4]) ? "0.0.0.0" : data[4];
+            this.PortsString = string.IsNullOrWhiteSpace(data[4]) ? "22,80,109,143,555,5555,442" : data[4];
+            ParsePortsString();
             //this.Win1 = string.IsNullOrWhiteSpace(data[5]) ? "0.0.0.0" : data[5];
             //this.Win2 = string.IsNullOrWhiteSpace(data[6]) ? "0.0.0.0" : data[6];
             //this.DHCPEnabled = string.IsNullOrWhiteSpace(data[7]) ? false : bool.Parse(data[7]);

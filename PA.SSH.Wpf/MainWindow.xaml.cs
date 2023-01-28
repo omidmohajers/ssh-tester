@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PA.SSH.Wpf.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,8 @@ namespace PA.SSH.Wpf
         public MainWindow()
         {
             InitializeComponent();
+            SshControlViewModel model = new SshControlViewModel();
+            this.DataContext = model;
         }
     }
 }
