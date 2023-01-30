@@ -2,6 +2,8 @@
 Test SSH Connection with Ping Response and Port Checking and Exchange HostKey and Getting Fingerprint
 I use SshClient Class From SSH.NET https://github.com/omidmohajers/SSH.NET create by @sshnet : https://github.com/sshnet
 
+[![Github All Releases](https://img.shields.io/github/downloads/omidmohajers/ssh-tester/total.svg)]()
+
 ## how to use
 for start create instance of 'SshConnectionChecker' and assign 'SshProfile' instance to properties
 then listen to : 'LogChanged' and 'Passed' events to getting connection information 
