@@ -15,6 +15,7 @@ namespace PA.SSH
         public string Password { get; set; }
         public string PortsString { get; set; }
         public string Name { get; set; }
+        public long PingAvrage { get; set; }
         #endregion
         public SshProfile()
         {

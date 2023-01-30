@@ -15,8 +15,9 @@ namespace PA.SSH
         public byte[] Fingerprint { get; set; }
         public TimeSpan Duration { get; set; }
         public StatusType Type { get; set; }
+        public long PingAvrage { get; set; }
 
-        public SshConnectionStatus(string srvr,ushort port, DateTime time, string message, byte[] fingerprint, TimeSpan duration,StatusType sType)
+        public SshConnectionStatus(string srvr,ushort port, DateTime time, string message, byte[] fingerprint, TimeSpan duration,StatusType sType,long pingAvrg)
         {
             Server = srvr;
             Port = port;
@@ -25,6 +26,7 @@ namespace PA.SSH
             Fingerprint = fingerprint;
             Duration = duration;
             Type = sType;
+            PingAvrage = pingAvrg;
         }
     }
 }

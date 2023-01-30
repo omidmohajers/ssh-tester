@@ -40,7 +40,7 @@
     </Reference>
     <Reference Include="Renci.SshNet, Version=2020.0.2.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\PA.SSH\bin\Debug\Renci.SshNet.dll</HintPath>
+      <HintPath>..\..\SSHNET\src\Renci.SshNet\bin\Release\net472\Renci.SshNet.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -62,6 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="StatusTypeToBackgroudConverter.cs" />
     <Compile Include="ViewModels\SshControlViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

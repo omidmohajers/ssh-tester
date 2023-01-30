@@ -13,12 +13,15 @@ namespace PA.SSH
 {
     public class SshConnectionChecker
     {
+        private Stopwatch watcher;
+        private bool finished = false;
         public SshProfile Profile { get; set; }
         public List<SshConnectionStatus> Log { get; private set; }
+        public bool AnyPort { get; set; }
         public string LastMessage { get; private set; }
 
         public event EventHandler<SshConnectionStatus> LogChanged = null;
-
+        public event EventHandler<EventArgs> Passed = null;
         public SshConnectionChecker()
         {
             Log = new List<SshConnectionStatus>();
@@ -32,14 +35,14 @@ namespace PA.SSH
             });
 
         }
-        public async Task ConnectAsync(string server ,int port,string username,string password)
+        public async Task ConnectAsync(string server, int port, string username, string password)
         {
             await Task.Run(() =>
             {
                 SshClient client = new SshClient(server, port, username, password);
                 client.ErrorOccurred += Client_ErrorOccurred;
                 client.HostKeyReceived += Client_HostKeyReceived;
-                Stopwatch watcher = new Stopwatch();
+                watcher = new Stopwatch();
                 try
                 {
                     SshConnectionStatus state = new SshConnectionStatus(
@@ -49,11 +52,12 @@ namespace PA.SSH
                         "Connecting...",
                         null,
                         TimeSpan.Zero,
-                         StatusType.Message
+                         StatusType.Message,
+                         0
                         );
                     AddLog(state);
                     watcher.Start();
-                    client.Connect();
+                    client.SayHello();
                     watcher.Stop();
                     state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
@@ -62,7 +66,8 @@ namespace PA.SSH
                         "Connected!",
                         null,
                         watcher.Elapsed,
-                         StatusType.Done
+                         StatusType.Done,
+                         Profile.PingAvrage
                         );
                     AddLog(state);
                 }
@@ -76,10 +81,10 @@ namespace PA.SSH
                         "The method was called after the client was disposed.",
                         null,
                         watcher.Elapsed,
-                         StatusType.Exception
+                         StatusType.Exception,
+                         0
                         );
                     AddLog(state);
-                    Task.Delay(5000);
                 }
                 catch (System.InvalidOperationException)
                 {
@@ -91,10 +96,10 @@ namespace PA.SSH
                         "The client is already connected.",
                         null,
                         watcher.Elapsed,
-                         StatusType.Exception
+                         StatusType.Exception,
+                         0
                         );
                     AddLog(state);
-                    Task.Delay(5000);
                 }
                 catch (System.Net.Sockets.SocketException)
                 {
@@ -106,10 +111,10 @@ namespace PA.SSH
                         "Socket connection to the SSH server or proxy server could not be established, or an error occurred while resolving the hostname.",
                         null,
                         watcher.Elapsed,
-                         StatusType.Exception
+                         StatusType.Exception,
+                         0
                         );
                     AddLog(state);
-                    Task.Delay(5000);
                 }
                 catch (Renci.SshNet.Common.SshConnectionException)
                 {
@@ -121,10 +126,10 @@ namespace PA.SSH
                         "SSH session could not be established.",
                         null,
                         watcher.Elapsed,
-                         StatusType.Exception
+                         StatusType.Exception,
+                         0
                         );
                     AddLog(state);
-                    Task.Delay(5000);
                 }
                 catch (Renci.SshNet.Common.SshAuthenticationException)
                 {
@@ -136,7 +141,8 @@ namespace PA.SSH
                         "Authentication of SSH session failed.",
                         null,
                         watcher.Elapsed,
-                         StatusType.ReplyButNoAthenticate
+                         StatusType.ReplyButNoAthenticate,
+                         0
                         );
                     AddLog(state);
                 }
@@ -150,10 +156,10 @@ namespace PA.SSH
                         "Failed to establish proxy connection.",
                         null,
                         watcher.Elapsed,
-                         StatusType.Exception
+                         StatusType.Exception,
+                         0
                         );
                     AddLog(state);
-                    Task.Delay(5000);
                 }
                 catch (Exception ex)
                 {
@@ -165,10 +171,10 @@ namespace PA.SSH
                         ex.Message,
                         null,
                         watcher.Elapsed,
-                         StatusType.Exception
+                         StatusType.Exception,
+                         0
                         );
                     AddLog(state);
-                    Task.Delay(5000);
                 }
                 finally
                 {
@@ -177,25 +183,29 @@ namespace PA.SSH
                         client.Disconnect();
                 }
             });
-            
+
         }
 
         private void Client_HostKeyReceived(object sender, HostKeyEventArgs e)
         {
+            watcher.Stop();
             SshClient client = sender as SshClient;
             SshConnectionStatus state = new SshConnectionStatus(
                 client.ConnectionInfo.Host,
                 (ushort)client.ConnectionInfo.Port,
                 DateTime.Now,
-                string.Format("Host Key Received : FingerPrint: {0} \n HostKey : {1} \n Host Key Name : {2}"
+                string.Format("{0}\nHost Key Received : \nFingerPrint: {1} \nHostKey : {2} \nHostKey Name : {3}"
+                                , Profile.Name
                                 , string.Join(",", e.FingerPrint)
                                 , string.Join(",", e.HostKey)
                                 , e.HostKeyName),
                 e.FingerPrint,
-                TimeSpan.Zero,
-                 StatusType.Message
+                watcher.Elapsed,
+                 StatusType.Done,
+                 Profile.PingAvrage
                 );
             AddLog(state);
+            finished = AnyPort;
         }
 
         private void Client_ErrorOccurred(object sender, ExceptionEventArgs e)
@@ -208,13 +218,15 @@ namespace PA.SSH
                 string.Format("Error Received : {0}", e.Exception.Message),
                 null,
                 TimeSpan.Zero,
-                 StatusType.Error
-                );
+                StatusType.Error,
+                0
+            );
             AddLog(state);
         }
 
         public async void ConnectAsync()
         {
+            finished = false;
             bool hasPing = await GetPing(Profile.Server);
             if (hasPing)
             {
@@ -222,8 +234,11 @@ namespace PA.SSH
                 foreach (ushort port in Profile.Ports)
                 {
                     await ConnectAsync(Profile.Server, port, Profile.Username, Profile.Password);
+                    if (finished)
+                        break;
                 }
             }
+            Passed?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task<bool> GetPing(string address)
@@ -232,24 +247,53 @@ namespace PA.SSH
             {
                 Ping ping = new Ping();
                 int done = 0;
+                long pingAvrg = 0;
+                StringBuilder sb = new StringBuilder().AppendLine(Profile.Name);
                 for (int i = 0; i < 4; i++)
                 {
                     PingReply reply = ping.Send(address);
+                    sb.AppendLine(string.Format("Ping : {0} {1} Time :{2} TTL : {3}", address, reply.Status.ToString(), reply.RoundtripTime, reply.Options?.Ttl));
 
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        done++;
+                        pingAvrg += reply.RoundtripTime;
+                    }
+                }
+                if (done >= 3)
+                {
+                    pingAvrg /= done;
+                    Profile.PingAvrage = pingAvrg;
                     SshConnectionStatus state = new SshConnectionStatus(
                         address,
                         (ushort)0,
                         DateTime.Now,
-                        string.Format("Ping : {0} {1} Time :{2} TTL : {3}", address, reply.Status.ToString(), reply.RoundtripTime, reply.Options?.Ttl),
+                        sb.AppendLine("Ping result is OK :)").ToString(),
                         null,
-                        new TimeSpan(0, 0, 0, 0, (int)reply.RoundtripTime),
-                         StatusType.Message
+                        TimeSpan.Zero,
+                        StatusType.PingOK,
+                        Profile.PingAvrage
                         );
-                    if (reply.Status == 0)
-                        done++;
+
                     AddLog(state);
+                    return true;
                 }
-                return done >= 3;
+                else
+                {
+                    SshConnectionStatus state = new SshConnectionStatus(
+                        address,
+                        (ushort)0,
+                        DateTime.Now,
+                        sb.AppendLine("Ping result is not OK :(").ToString(),
+                        null,
+                        TimeSpan.Zero,
+                        StatusType.PingError,
+                        0
+                        );
+
+                    AddLog(state);
+                    return false;
+                }
             });
         }
     }

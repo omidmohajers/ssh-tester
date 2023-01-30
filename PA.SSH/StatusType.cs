@@ -7,5 +7,7 @@
         Error = 2,
         Exception = 3,
         ReplyButNoAthenticate = 4,
+        PingOK = 5,
+        PingError = 6,
     }
 }
