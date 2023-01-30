@@ -7,7 +7,7 @@
         xmlns:viewmodels="clr-namespace:PA.SSH.Wpf.ViewModels" 
         d:DataContext="{d:DesignInstance Type=viewmodels:SshControlViewModel}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" WindowStartupLocation="CenterScreen" WindowState="Maximized">
     <Window.Resources>
         <local:StatusTypeToBackgroudConverter x:Key="TypeToBackgroudConverter"/>
     </Window.Resources>
@@ -23,18 +23,20 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <ToolBar>
-            <Button Content="Load" Margin="5" Padding="5" Command="{Binding LoadCommand}"/>
-            <Button Content="Save" Margin="5" Padding="5" Command="{Binding SaveProfilesCommand}"/>
+            <Button Content="Load" Margin="5" Padding="5" Command="{Binding LoadCommand}" IsEnabled="{Binding IsIdle}"/>
+            <Button Content="Save" Margin="5" Padding="5" Command="{Binding SaveProfilesCommand}" IsEnabled="{Binding IsIdle}" />
+            <Button Content="SaveAs" Margin="5" Padding="5" Command="{Binding SaveAsProfilesCommand}" IsEnabled="{Binding IsIdle}"/>
             <Separator/>
-            <Button Content="New" Margin="5" Padding="5" Command="{Binding AddCommand}"/>
-            <Button Content="Edit" Margin="5" Padding="5" Command="{Binding EditCommand}"/>
-            <Button Content="Delete" Margin="5" Padding="5" Command="{Binding RemoveCommand}"/>
+            <Button Content="Delete" Margin="5" Padding="5" Command="{Binding RemoveCommand}" IsEnabled="{Binding IsIdle}"/>
         </ToolBar>
         <ToolBar Grid.Column="1">
-            <CheckBox IsChecked="{Binding RunAsAnyPortMethod}" Content="Any Port Response Method" Margin="5" Padding="5" />
-            <Button Content="Start" Margin="5" Padding="5" Command="{Binding StartCommand}"/>
-            <Button Content="Save (Best Ping)" Margin="5" Padding="5" Command="{Binding SaveSuccessListByPingCommand}"/>
-            <Button Content="Save (Best Response)" Margin="5" Padding="5" Command="{Binding SaveSuccessListByResponseCommand}"/>
+            <CheckBox IsChecked="{Binding RunAsAnyPortMethod}" Content="Any Port Response Method" Margin="5" Padding="5" IsEnabled="{Binding IsIdle}"/>
+            <Separator/>
+            <Button Content="Start" Margin="5" Padding="5" Command="{Binding StartCommand}" IsEnabled="{Binding IsIdle}"/>
+            <Button Content="Stop" Margin="5" Padding="5" Command="{Binding StopCommand}" IsEnabled="{Binding IsListenToCancel}"/>
+            <Separator/>
+            <Button Content="Save (Best Ping)" Margin="5" Padding="5" Command="{Binding SaveSuccessListByPingCommand}" IsEnabled="{Binding IsFinished}"/>
+            <Button Content="Save (Best Response)" Margin="5" Padding="5" Command="{Binding SaveSuccessListByResponseCommand}" IsEnabled="{Binding IsFinished}"/>
         </ToolBar>
         <ListView Grid.Row="2" ItemsSource="{Binding PublicLog}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
             <ListView.ItemTemplate>

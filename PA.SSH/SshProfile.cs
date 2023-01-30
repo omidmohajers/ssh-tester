@@ -67,12 +67,8 @@ namespace PA.SSH
             this.Server = string.IsNullOrWhiteSpace(data[0]) ? "0.0.0.0" : data[1];
             this.Username = string.IsNullOrWhiteSpace(data[2]) ? "0.0.0.0" : data[2];
             this.Password = string.IsNullOrWhiteSpace(data[3]) ? "0.0.0.0" : data[3];
-            this.PortsString = string.IsNullOrWhiteSpace(data[4]) ? "22,80,109,143,555,5555,442" : data[4];
+            this.PortsString = string.IsNullOrWhiteSpace(data[4]) ? "22:80:109:143:555:5555:442" : data[4];
             ParsePortsString();
-            //this.Win1 = string.IsNullOrWhiteSpace(data[5]) ? "0.0.0.0" : data[5];
-            //this.Win2 = string.IsNullOrWhiteSpace(data[6]) ? "0.0.0.0" : data[6];
-            //this.DHCPEnabled = string.IsNullOrWhiteSpace(data[7]) ? false : bool.Parse(data[7]);
-            //this.NIC = string.IsNullOrWhiteSpace(data[8]) ? "" : data[8];
 
         }
         public string Serialize()
@@ -83,11 +79,6 @@ namespace PA.SSH
             data[2] = Username;
             data[3] = Password;
             data[4] = PortsString;
-            //data[5] = Win1;
-            //data[6] = Win2;
-            //data[7] = DHCPEnabled.ToString();
-            //data[8] = NIC;
-            //data[9] = Name;
             return string.Join(",", data);
         }
         #endregion

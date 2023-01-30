@@ -19,6 +19,7 @@ namespace PA.SSH
         public List<SshConnectionStatus> Log { get; private set; }
         public bool AnyPort { get; set; }
         public string LastMessage { get; private set; }
+        public bool IsCanceled { get; private set; }
 
         public event EventHandler<SshConnectionStatus> LogChanged = null;
         public event EventHandler<EventArgs> Passed = null;
@@ -56,6 +57,8 @@ namespace PA.SSH
                          0
                         );
                     AddLog(state);
+                    if (IsCanceled)
+                        return;
                     watcher.Start();
                     client.SayHello();
                     watcher.Stop();
@@ -186,6 +189,11 @@ namespace PA.SSH
 
         }
 
+        public void CancelOperation()
+        {
+            IsCanceled = true;
+        }
+
         private void Client_HostKeyReceived(object sender, HostKeyEventArgs e)
         {
             watcher.Stop();
@@ -226,16 +234,20 @@ namespace PA.SSH
 
         public async void ConnectAsync()
         {
+            if (IsCanceled)
+                return;
             finished = false;
             bool hasPing = await GetPing(Profile.Server);
-            if (hasPing)
+            if (hasPing && !IsCanceled)
             {
-                var getConnectionTasks = new List<Task<List<SshConnectionStatus>>>();
                 foreach (ushort port in Profile.Ports)
                 {
-                    await ConnectAsync(Profile.Server, port, Profile.Username, Profile.Password);
-                    if (finished)
+                    if (finished || IsCanceled)
+                    {
+                        finished = true;
                         break;
+                    }
+                    await ConnectAsync(Profile.Server, port, Profile.Username, Profile.Password);
                 }
             }
             Passed?.Invoke(this, EventArgs.Empty);
