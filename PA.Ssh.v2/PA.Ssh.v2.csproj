@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="input.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Renci.SshNet">
+      <HintPath>..\..\SSHNET\src\Renci.SshNet\bin\Release\net472\Renci.SshNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
