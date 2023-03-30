@@ -149,23 +149,24 @@ namespace PA.SSH.Wpf.ViewModels
         }
         private void SaveSuccessListByResponse()
         {
-            var data = SuccessLog.Where(log => log.Type == StatusType.Done).OrderBy(o => o.Duration);
+            var data = SuccessLog.Where(log => log.Type == StatusType.Done).OrderBy(o => o.Duration).ToList();
             SaveSuccessList(data);
         }
-        private void SaveSuccessList(IOrderedEnumerable<SshConnectionStatus> data)
+        private void SaveSuccessList(List<SshConnectionStatus> data)
         {
-            StringBuilder sb = new StringBuilder();
+            string[] lines = new string[data.Count];
+            int i = 0;
             foreach (SshConnectionStatus scs in data)
             {
                 string name = SshProfiles.FirstOrDefault(item => item.Server == scs.Server)?.Name;
-                sb.AppendLine(string.Format("{0},{1},{2},Ping : {3}, Response : {4}ms", name ?? "", scs.Server, scs.Port,scs.PingAvrage,scs.Duration.TotalMilliseconds));
+                lines[i++] = string.Format("{0},{1},{2},Ping : {3}, Response : {4}ms", name ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration.TotalMilliseconds);
             }
             string filename = "output.txt";
-                File.WriteAllText(filename, sb.ToString());
+                File.WriteAllLines(filename, lines);
         }
         private void SaveSuccessListByPing()
         {
-            var data = SuccessLog.Where(log => log.Type == StatusType.Done).OrderBy(o => o.PingAvrage);
+            var data = SuccessLog.Where(log => log.Type == StatusType.Done).OrderBy(o => o.PingAvrage).ToList();
             SaveSuccessList(data);
         }
         private void SaveProfiles()
