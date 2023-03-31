@@ -38,7 +38,7 @@
             <Button Content="Save (Best Ping)" Margin="5" Padding="5" Command="{Binding SaveSuccessListByPingCommand}" IsEnabled="{Binding IsFinished}"/>
             <Button Content="Save (Best Response)" Margin="5" Padding="5" Command="{Binding SaveSuccessListByResponseCommand}" IsEnabled="{Binding IsFinished}"/>
         </ToolBar>
-        <ListView Grid.Row="2" ItemsSource="{Binding PublicLog}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+        <ListView Grid.Row="2" ItemsSource="{Binding PublicLog}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" d:ItemsSource="{d:SampleData ItemCount=5}" >
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
@@ -58,7 +58,7 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <ListView Grid.Column="1" Grid.RowSpan="2" Grid.Row="1" ItemsSource="{Binding SuccessLog}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+        <ListView Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SuccessLog}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0,0,0,0" >
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" >
@@ -100,5 +100,22 @@
             </DataGrid.Columns>
         </DataGrid>
         <ProgressBar Grid.Row="3" Height="10" Grid.ColumnSpan="2" Minimum="0" Maximum="{Binding SshProfiles.Count}" Value="{Binding PassCount}"/>
+        <DataGrid Grid.Row="1" 
+            ItemsSource="{Binding OutputLog}" 
+            AutoGenerateColumns="False" 
+            ColumnHeaderHeight="25"
+            VerticalContentAlignment="Center"
+            HorizontalContentAlignment="Center"
+            MinRowHeight="25"
+            Grid.Column="1">
+
+            <DataGrid.Columns >
+                <DataGridTextColumn Header="Host Name" Binding="{Binding HostName}" Width="150"/>
+                <DataGridTextColumn Header="Server" Binding="{Binding Server}" Width="100"/>
+                <DataGridTextColumn Header="Port" Binding="{Binding Port}" Width="30"/>
+                <DataGridTextColumn Header="Response" Binding="{Binding Duration}" Width="100"/>
+                <DataGridTextColumn Header="Ping Avg" Binding="{Binding PingAvrage}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>

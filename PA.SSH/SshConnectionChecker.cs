@@ -47,6 +47,7 @@ namespace PA.SSH
                 try
                 {
                     SshConnectionStatus state = new SshConnectionStatus(
+                        Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -63,6 +64,7 @@ namespace PA.SSH
                     client.SayHello();
                     watcher.Stop();
                     state = new SshConnectionStatus(
+                        Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -77,7 +79,7 @@ namespace PA.SSH
                 catch (System.ObjectDisposedException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -93,6 +95,7 @@ namespace PA.SSH
                 {
                     watcher.Stop();
                     SshConnectionStatus state = new SshConnectionStatus(
+                        Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -107,7 +110,7 @@ namespace PA.SSH
                 catch (System.Net.Sockets.SocketException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -122,7 +125,7 @@ namespace PA.SSH
                 catch (Renci.SshNet.Common.SshConnectionException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -137,7 +140,7 @@ namespace PA.SSH
                 catch (Renci.SshNet.Common.SshAuthenticationException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -152,7 +155,7 @@ namespace PA.SSH
                 catch (Renci.SshNet.Common.ProxyException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -168,6 +171,7 @@ namespace PA.SSH
                 {
                     watcher.Stop();
                     SshConnectionStatus state = new SshConnectionStatus(
+                        Profile.Name,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -199,6 +203,7 @@ namespace PA.SSH
             watcher.Stop();
             SshClient client = sender as SshClient;
             SshConnectionStatus state = new SshConnectionStatus(
+                Profile.Name,
                 client.ConnectionInfo.Host,
                 (ushort)client.ConnectionInfo.Port,
                 DateTime.Now,
@@ -219,7 +224,7 @@ namespace PA.SSH
         private void Client_ErrorOccurred(object sender, ExceptionEventArgs e)
         {
             SshClient client = sender as SshClient;
-            SshConnectionStatus state = new SshConnectionStatus(
+            SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
                 client.ConnectionInfo.Host,
                 (ushort)client.ConnectionInfo.Port,
                 DateTime.Now,
@@ -277,6 +282,7 @@ namespace PA.SSH
                     pingAvrg /= done;
                     Profile.PingAvrage = pingAvrg;
                     SshConnectionStatus state = new SshConnectionStatus(
+                        Profile.Name,
                         address,
                         (ushort)0,
                         DateTime.Now,
@@ -293,6 +299,7 @@ namespace PA.SSH
                 else
                 {
                     SshConnectionStatus state = new SshConnectionStatus(
+                        Profile.Name,
                         address,
                         (ushort)0,
                         DateTime.Now,

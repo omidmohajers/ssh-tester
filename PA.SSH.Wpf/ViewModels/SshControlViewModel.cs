@@ -59,6 +59,7 @@ namespace PA.SSH.Wpf.ViewModels
         public ObservableCollection<SshProfile> SshProfiles { get; private set; }
         public ObservableCollection<SshConnectionStatus> PublicLog { get; private set; }
         public ObservableCollection<SshConnectionStatus> SuccessLog { get; private set; }
+        public ObservableCollection<SshConnectionStatus> OutputLog { get; private set; }
         public SshProfile SelectedProfile { get; set; }
         public bool IsFinished
         {
@@ -79,6 +80,7 @@ namespace PA.SSH.Wpf.ViewModels
             SshProfiles = new ObservableCollection<SshProfile>();
             PublicLog = new ObservableCollection<SshConnectionStatus>();
             SuccessLog = new ObservableCollection<SshConnectionStatus>();
+            OutputLog = new ObservableCollection<SshConnectionStatus>();
             LoadCommand = new DelegateCommand(LoadProfiles, () => true);
             SaveAsProfilesCommand = new DelegateCommand(SaveAsProfiles, () => true);
             RemoveCommand = new DelegateCommand(Remove, () => true);
@@ -106,6 +108,7 @@ namespace PA.SSH.Wpf.ViewModels
             PassCount = 0;
             PublicLog.Clear();
             SuccessLog.Clear();
+            OutputLog.Clear();
             IsCanceled = false;
             IsRunning = true;
             checkers = new List<SshConnectionChecker>();
@@ -150,6 +153,11 @@ namespace PA.SSH.Wpf.ViewModels
             switch (e.Type)
             {
                 case StatusType.Done:
+                    App.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        OutputLog.Add(e);
+                    });
+                    break;
                 case StatusType.PingOK:
                     App.Current.Dispatcher.Invoke((Action)delegate
                     {
@@ -188,7 +196,7 @@ namespace PA.SSH.Wpf.ViewModels
         }
         private void SaveSuccessListByResponse()
         {
-            var data = SuccessLog.Where(log => log.Type != StatusType.PingOK).OrderBy(o => o.Duration).ToList();
+            var data = OutputLog.OrderBy(o => o.Duration).ToList();
             SaveSuccessList(data);
         }
         private void SaveSuccessList(List<SshConnectionStatus> data)
@@ -197,8 +205,7 @@ namespace PA.SSH.Wpf.ViewModels
             int i = 0;
             foreach (SshConnectionStatus scs in data)
             {
-                string name = SshProfiles.FirstOrDefault(item => item.Server == scs.Server)?.Name;
-                lines[i++] = string.Format("{0},{1},{2},Ping : {3}, Response : {4}ms", name ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration.TotalMilliseconds);
+                lines[i++] = string.Format("{0},{1},{2},Ping : {3}, Response : {4}ms", scs.HostName ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration.TotalMilliseconds);
             }
             SaveFileDialog dlg = new SaveFileDialog();
             dlg.Filter = "Text Files|*.txt";
@@ -207,7 +214,7 @@ namespace PA.SSH.Wpf.ViewModels
         }
         private void SaveSuccessListByPing()
         {
-            var data = SuccessLog.Where(log => log.Type == StatusType.Done).OrderBy(o => o.PingAvrage).ToList();
+            var data = OutputLog.OrderBy(o => o.PingAvrage).ToList();
             SaveSuccessList(data);
         }
         private void SaveProfiles()
