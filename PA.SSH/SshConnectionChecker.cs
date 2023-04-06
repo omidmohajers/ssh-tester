@@ -47,7 +47,7 @@ namespace PA.SSH
                 try
                 {
                     SshConnectionStatus state = new SshConnectionStatus(
-                        Profile.Name,
+                        Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -64,7 +64,7 @@ namespace PA.SSH
                     client.SayHello();
                     watcher.Stop();
                     state = new SshConnectionStatus(
-                        Profile.Name,
+                        Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -79,7 +79,7 @@ namespace PA.SSH
                 catch (System.ObjectDisposedException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
+                    SshConnectionStatus state = new SshConnectionStatus(Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -95,7 +95,7 @@ namespace PA.SSH
                 {
                     watcher.Stop();
                     SshConnectionStatus state = new SshConnectionStatus(
-                        Profile.Name,
+                        Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -110,7 +110,7 @@ namespace PA.SSH
                 catch (System.Net.Sockets.SocketException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
+                    SshConnectionStatus state = new SshConnectionStatus(Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -125,7 +125,7 @@ namespace PA.SSH
                 catch (Renci.SshNet.Common.SshConnectionException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
+                    SshConnectionStatus state = new SshConnectionStatus(Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -140,7 +140,7 @@ namespace PA.SSH
                 catch (Renci.SshNet.Common.SshAuthenticationException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
+                    SshConnectionStatus state = new SshConnectionStatus(Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -155,7 +155,7 @@ namespace PA.SSH
                 catch (Renci.SshNet.Common.ProxyException)
                 {
                     watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
+                    SshConnectionStatus state = new SshConnectionStatus(Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -171,7 +171,7 @@ namespace PA.SSH
                 {
                     watcher.Stop();
                     SshConnectionStatus state = new SshConnectionStatus(
-                        Profile.Name,
+                        Profile,
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
@@ -203,12 +203,12 @@ namespace PA.SSH
             watcher.Stop();
             SshClient client = sender as SshClient;
             SshConnectionStatus state = new SshConnectionStatus(
-                Profile.Name,
+                Profile,
                 client.ConnectionInfo.Host,
                 (ushort)client.ConnectionInfo.Port,
                 DateTime.Now,
                 string.Format("{0}\nHost Key Received : \nFingerPrint: {1} \nHostKey : {2} \nHostKey Name : {3}"
-                                , Profile.Name
+                                , Profile
                                 , string.Join(",", e.FingerPrint)
                                 , string.Join(",", e.HostKey)
                                 , e.HostKeyName),
@@ -224,7 +224,7 @@ namespace PA.SSH
         private void Client_ErrorOccurred(object sender, ExceptionEventArgs e)
         {
             SshClient client = sender as SshClient;
-            SshConnectionStatus state = new SshConnectionStatus(Profile.Name,
+            SshConnectionStatus state = new SshConnectionStatus(Profile,
                 client.ConnectionInfo.Host,
                 (ushort)client.ConnectionInfo.Port,
                 DateTime.Now,
@@ -265,7 +265,7 @@ namespace PA.SSH
                 Ping ping = new Ping();
                 int done = 0;
                 long pingAvrg = 0;
-                StringBuilder sb = new StringBuilder().AppendLine(Profile.Name);
+                StringBuilder sb = new StringBuilder().AppendLine(Profile.Fullname);
                 for (int i = 0; i < 4; i++)
                 {
                     PingReply reply = ping.Send(address);
@@ -282,7 +282,7 @@ namespace PA.SSH
                     pingAvrg /= done;
                     Profile.PingAvrage = pingAvrg;
                     SshConnectionStatus state = new SshConnectionStatus(
-                        Profile.Name,
+                        Profile,
                         address,
                         (ushort)0,
                         DateTime.Now,
@@ -299,7 +299,7 @@ namespace PA.SSH
                 else
                 {
                     SshConnectionStatus state = new SshConnectionStatus(
-                        Profile.Name,
+                        Profile,
                         address,
                         (ushort)0,
                         DateTime.Now,

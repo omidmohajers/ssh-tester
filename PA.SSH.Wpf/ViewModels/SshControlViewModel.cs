@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace PA.SSH.Wpf.ViewModels
@@ -196,16 +197,17 @@ namespace PA.SSH.Wpf.ViewModels
         }
         private void SaveSuccessListByResponse()
         {
-            var data = OutputLog.OrderBy(o => o.Duration).ToList();
-            SaveSuccessList(data);
+            //var data = OutputLog.OrderBy(o => o.Duration).ToList();
+           // SaveSuccessList(data);
         }
-        private void SaveSuccessList(List<SshConnectionStatus> data)
+        private void SaveSuccessList()
         {
-            string[] lines = new string[data.Count()];
+            string[] lines = new string[OutputLog.Count()];
             int i = 0;
-            foreach (SshConnectionStatus scs in data)
+            var MySource = CollectionViewSource.GetDefaultView(SshProfiles);
+            foreach (SshConnectionStatus scs in MySource.OfType<SshConnectionStatus>())
             {
-                lines[i++] = string.Format("{0},{1},{2},Ping : {3}, Response : {4}ms", scs.HostName ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration.TotalMilliseconds);
+                lines[i++] = string.Format("{0},{1},{2},{3},{4},{5},Ping : {6}, Response : {7}ms", scs.Profile?.Provider ?? "", scs.Profile?.ValidationDays ?? 0, scs.Profile?.HostAddress ?? "", scs.Profile?.Location ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration.TotalMilliseconds);
             }
             SaveFileDialog dlg = new SaveFileDialog();
             dlg.Filter = "Text Files|*.txt";
@@ -214,8 +216,8 @@ namespace PA.SSH.Wpf.ViewModels
         }
         private void SaveSuccessListByPing()
         {
-            var data = OutputLog.OrderBy(o => o.PingAvrage).ToList();
-            SaveSuccessList(data);
+           // var data = OutputLog.OrderBy(o => o.PingAvrage).ToList();
+            SaveSuccessList();
         }
         private void SaveProfiles()
         {
@@ -223,8 +225,9 @@ namespace PA.SSH.Wpf.ViewModels
         }
         private void SaveToFile(string fileName)
         {
+            var MySource = CollectionViewSource.GetDefaultView(SshProfiles);
             StringBuilder sb = new StringBuilder();
-            foreach (SshProfile profile in SshProfiles)
+            foreach (SshProfile profile in MySource.OfType<SshProfile>())
                 sb.AppendLine(profile.Serialize());
             File.WriteAllText(fileName, sb.ToString());
         }

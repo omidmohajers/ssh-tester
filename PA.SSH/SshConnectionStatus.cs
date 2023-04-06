@@ -16,11 +16,11 @@ namespace PA.SSH
         public TimeSpan Duration { get; set; }
         public StatusType Type { get; set; }
         public long PingAvrage { get; set; }
-        public string HostName { get; set; }
+        public SshProfile Profile { get; set; }
 
-        public SshConnectionStatus(string name, string srvr,ushort port, DateTime time, string message, byte[] fingerprint, TimeSpan duration,StatusType sType,long pingAvrg)
+        public SshConnectionStatus(SshProfile profile, string srvr,ushort port, DateTime time, string message, byte[] fingerprint, TimeSpan duration,StatusType sType,long pingAvrg)
         {
-            HostName = name;
+            Profile = profile;
             Server = srvr;
             Port = port;
             Time = time;
