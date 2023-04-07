@@ -46,6 +46,15 @@ namespace PA.SSH.Wpf.ViewModels
                 RaisePropertyChanged("IsFinished");
             }
         }
+        public string AppName
+        {
+            get
+            {
+                System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+                return string.Format("SSH TESTER ({0})", fvi.ProductVersion);
+            }
+        }
         public bool IsIdle { get => !IsRunning; }
         public double PassCount { get => passCount; set => SetProperty(ref passCount, value); }
         public bool RunAsAnyPortMethod { get => runAsAnyPortMethod; set => SetProperty(ref runAsAnyPortMethod, value); }
@@ -204,7 +213,7 @@ namespace PA.SSH.Wpf.ViewModels
         {
             string[] lines = new string[OutputLog.Count()];
             int i = 0;
-            var MySource = CollectionViewSource.GetDefaultView(SshProfiles);
+            var MySource = CollectionViewSource.GetDefaultView(OutputLog);
             foreach (SshConnectionStatus scs in MySource.OfType<SshConnectionStatus>())
             {
                 lines[i++] = string.Format("{0},{1},{2},{3},{4},{5},Ping : {6}, Response : {7}ms", scs.Profile?.Provider ?? "", scs.Profile?.ValidationDays ?? 0, scs.Profile?.HostAddress ?? "", scs.Profile?.Location ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration.TotalMilliseconds);

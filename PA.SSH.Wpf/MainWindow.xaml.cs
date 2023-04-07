@@ -27,5 +27,10 @@ namespace PA.SSH.Wpf
             SshControlViewModel model = new SshControlViewModel();
             this.DataContext = model;
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
