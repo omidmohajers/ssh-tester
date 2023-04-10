@@ -23,7 +23,7 @@ namespace PA.SSH
         {
             get
             {
-                return $"${Provider} {ValidationDays} {HostAddress}({Server}) {Location}";
+                return $"{Provider} {ValidationDays} {HostAddress}({Server}) {Location}";
             }
         }
         #endregion

@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -122,21 +124,52 @@ namespace PA.SSH.Wpf.ViewModels
             IsCanceled = false;
             IsRunning = true;
             checkers = new List<SshConnectionChecker>();
-            foreach(SshProfile prof in SshProfiles)
+            var cts = new CancellationTokenSource();
+            ParallelOptions po = new ParallelOptions();
+            po.CancellationToken = cts.Token;
+            po.MaxDegreeOfParallelism = 16; //System.Environment.ProcessorCount;
+            ParallelLoopResult result;
+
+            try
             {
-                if (IsCanceled)
+                object locker = new object();
+                result = Parallel.ForEach(SshProfiles, po, (prof, state) =>
                 {
-                    IsRunning = false;
-                    break;
+                    //lock (locker)
+                    //{
+                    //    //progressInfo.curentWorkingThreads++;
+                    //}
+
+
+                    //lock (locker)
+                    //{
+                    //    //progressInfo.curentWorkingThreads--;
+                    //    //progressInfo.lastCheckedIP = ip;
+                    //    //progressInfo.totalCheckedIPInCurIPRange++;
+                    //    //progressInfo.totalCheckedIP++;
+                    //}
+                    if (IsCanceled)
+                    {
+                        IsRunning = false;
+                        state.Stop();
+                    }
+                    connectionChecker = new SshConnectionChecker();
+                    connectionChecker.AnyPort = RunAsAnyPortMethod;
+                    connectionChecker.Passed += ConnectionChecker_Passed;
+                    connectionChecker.LogChanged += ConnectionChecker_LogChanged;
+                    connectionChecker.Profile = prof;
+                    connectionChecker.ConnectAsync();
+                    checkers.Add(connectionChecker);
+                    //Thread.Sleep(1);
                 }
-                connectionChecker = new SshConnectionChecker();
-                connectionChecker.AnyPort = RunAsAnyPortMethod;
-                connectionChecker.Passed += ConnectionChecker_Passed;
-                connectionChecker.LogChanged += ConnectionChecker_LogChanged;
-                connectionChecker.Profile = prof;
-                connectionChecker.ConnectAsync();
-                checkers.Add(connectionChecker);
+                );
             }
+            catch(Exception ex) 
+            {
+                MessageBox.Show(ex.Message);
+            }
+            RaisePropertyChanged("IsIdle");
+            RaisePropertyChanged("IsFinished");
         }
         private void Stop()
         {
@@ -156,6 +189,8 @@ namespace PA.SSH.Wpf.ViewModels
             {
                 MessageBox.Show("All Profiles Checked!!!");
                 IsRunning = false;
+                RaisePropertyChanged("IsIdle");
+                RaisePropertyChanged("IsFinished");
             }
         }
         private void ConnectionChecker_LogChanged(object sender, SshConnectionStatus e)

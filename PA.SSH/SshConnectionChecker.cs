@@ -41,6 +41,7 @@ namespace PA.SSH
             await Task.Run(() =>
             {
                 SshClient client = new SshClient(server, port, username, password);
+                client.ConnectionInfo.Timeout = TimeSpan.FromSeconds(5);
                 client.ErrorOccurred += Client_ErrorOccurred;
                 client.HostKeyReceived += Client_HostKeyReceived;
                 watcher = new Stopwatch();
