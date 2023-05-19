@@ -59,28 +59,32 @@ namespace PA.SSH
             process.ErrorDataReceived += Process_ErrorDataReceived;
             process.Exited += Process_Exited;
 
-            try
-            {
-                watcher = Stopwatch.StartNew();
+            //try
+            //{
+            watcher = Stopwatch.StartNew();
 
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                process.WaitForExit();
-               // ResponseTime = (long)process?.TotalProcessorTime.TotalMilliseconds;
-                //if (watcher != null)
-                //{
-                //    ResponseTime = watcher.ElapsedMilliseconds;
-                //    watcher.Stop();
-                //    watcher = null;
-                //}
-                if (!done)
-                    ProcessFailed?.Invoke(this, EventArgs.Empty);
-            }
-            catch
-            {
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.WaitForExit();
+            // ResponseTime = (long)process?.TotalProcessorTime.TotalMilliseconds;
+            //if (watcher != null)
+            //{
+            //    ResponseTime = watcher.ElapsedMilliseconds;
+            //    watcher.Stop();
+            //    watcher = null;
+            //}
+            if (!done)
                 ProcessFailed?.Invoke(this, EventArgs.Empty);
-            }
+            else
+
+                ProcessSucceed?.Invoke(this, EventArgs.Empty);
+            //}
+            //catch
+            //{
+            //    done = false;
+            //    ProcessFailed?.Invoke(this, EventArgs.Empty);
+            //}
         }
 
         private void Process_Exited(object sender, EventArgs e)
@@ -113,7 +117,6 @@ namespace PA.SSH
                     //    //watcher.Reset();
                     //    watcher = null;
                     //}
-                    ProcessSucceed?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

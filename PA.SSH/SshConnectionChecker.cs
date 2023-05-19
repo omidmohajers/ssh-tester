@@ -87,7 +87,7 @@ namespace PA.SSH
                         DateTime.Now,
                         "The method was called after the client was disposed.",
                         null,
-                        0,
+                        -4,
                          StatusType.Exception,
                          0
                         );
@@ -101,7 +101,7 @@ namespace PA.SSH
                         DateTime.Now,
                         "The client is already connected.",
                         null,
-                        0,
+                        -3,
                          StatusType.Exception,
                          0
                         );
@@ -114,7 +114,7 @@ namespace PA.SSH
                         DateTime.Now,
                         "Socket connection to the SSH server or proxy server could not be established, or an error occurred while resolving the hostname.",
                         null,
-                        0,
+                        -2,
                          StatusType.Exception,
                          0
                         );
@@ -139,8 +139,8 @@ namespace PA.SSH
                 DateTime.Now,
                 client.Data,
                 null,
-                client.ResponseTime,
-                 StatusType.Error,
+                -1,
+                 StatusType.Exception,
                  Profile.PingAvrage
                 );
             AddLog(state);
