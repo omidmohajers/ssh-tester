@@ -13,7 +13,6 @@ namespace PA.SSH
 {
     public class SshConnectionChecker
     {
-        private Stopwatch watcher;
         private bool finished = false;
         public SshProfile Profile { get; set; }
         public List<SshConnectionStatus> Log { get; private set; }
@@ -40,7 +39,6 @@ namespace PA.SSH
                 SshClient client = new SshClient(server, port, username, password);
                 client.ErrorOccurred += Client_ErrorOccurred;
                 client.HostKeyReceived += Client_HostKeyReceived;
-                watcher = new Stopwatch();
                 try
                 {
                     SshConnectionStatus state = new SshConnectionStatus(
@@ -49,23 +47,20 @@ namespace PA.SSH
                         DateTime.Now,
                         "Connecting...",
                         null,
-                        TimeSpan.Zero,
+                        0,
                          StatusType.Message,
                          0
                         );
                     AddLog(state);
                     if (IsCanceled)
                         return;
-                    watcher.Start();
-                    client.SayHello();
-                    watcher.Stop();
                     state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         "Connected!",
                         null,
-                        watcher.Elapsed,
+                        0   ,
                          StatusType.Done,
                          Profile.PingAvrage
                         );
@@ -73,14 +68,14 @@ namespace PA.SSH
                 }
                 catch (System.ObjectDisposedException)
                 {
-                    watcher.Stop();
+                   
                     SshConnectionStatus state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         "The method was called after the client was disposed.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -88,14 +83,14 @@ namespace PA.SSH
                 }
                 catch (System.InvalidOperationException)
                 {
-                    watcher.Stop();
+                   
                     SshConnectionStatus state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         "The client is already connected.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -103,14 +98,14 @@ namespace PA.SSH
                 }
                 catch (System.Net.Sockets.SocketException)
                 {
-                    watcher.Stop();
+                   
                     SshConnectionStatus state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         "Socket connection to the SSH server or proxy server could not be established, or an error occurred while resolving the hostname.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -118,14 +113,14 @@ namespace PA.SSH
                 }
                 catch (Renci.SshNet.Common.SshConnectionException)
                 {
-                    watcher.Stop();
+                   
                     SshConnectionStatus state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         "SSH session could not be established.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -133,14 +128,14 @@ namespace PA.SSH
                 }
                 catch (Renci.SshNet.Common.SshAuthenticationException)
                 {
-                    watcher.Stop();
+                   
                     SshConnectionStatus state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         "Authentication of SSH session failed.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.ReplyButNoAthenticate,
                          0
                         );
@@ -148,14 +143,14 @@ namespace PA.SSH
                 }
                 catch (Renci.SshNet.Common.ProxyException)
                 {
-                    watcher.Stop();
+                   
                     SshConnectionStatus state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         "Failed to establish proxy connection.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -163,14 +158,14 @@ namespace PA.SSH
                 }
                 catch (Exception ex)
                 {
-                    watcher.Stop();
+                   
                     SshConnectionStatus state = new SshConnectionStatus(
                         client.ConnectionInfo.Host,
                         (ushort)client.ConnectionInfo.Port,
                         DateTime.Now,
                         ex.Message,
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -178,7 +173,6 @@ namespace PA.SSH
                 }
                 finally
                 {
-                    watcher = null;
                     if (client.IsConnected)
                         client.Disconnect();
                 }
@@ -193,7 +187,7 @@ namespace PA.SSH
 
         private void Client_HostKeyReceived(object sender, HostKeyEventArgs e)
         {
-            watcher.Stop();
+           
             SshClient client = sender as SshClient;
             SshConnectionStatus state = new SshConnectionStatus(
                 client.ConnectionInfo.Host,
@@ -205,7 +199,7 @@ namespace PA.SSH
                                 , string.Join(",", e.HostKey)
                                 , e.HostKeyName),
                 e.FingerPrint,
-                watcher.Elapsed,
+               client.ResponseTime,
                  StatusType.Done,
                  Profile.PingAvrage
                 );
@@ -222,7 +216,7 @@ namespace PA.SSH
                 DateTime.Now,
                 string.Format("Error Received : {0}", e.Exception.Message),
                 null,
-                TimeSpan.Zero,
+                0,
                 StatusType.Error,
                 0
             );
@@ -279,7 +273,7 @@ namespace PA.SSH
                         DateTime.Now,
                         sb.AppendLine("Ping result is OK :)").ToString(),
                         null,
-                        TimeSpan.Zero,
+                        0,
                         StatusType.PingOK,
                         Profile.PingAvrage
                         );
@@ -295,7 +289,7 @@ namespace PA.SSH
                         DateTime.Now,
                         sb.AppendLine("Ping result is not OK :(").ToString(),
                         null,
-                        TimeSpan.Zero,
+                        0,
                         StatusType.PingError,
                         0
                         );

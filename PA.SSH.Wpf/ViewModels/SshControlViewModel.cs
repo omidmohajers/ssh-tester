@@ -69,9 +69,9 @@ namespace PA.SSH.Wpf.ViewModels
         public DelegateCommand SaveSuccessListByPingCommand { get; private set; }
         public DelegateCommand SaveSuccessListByResponseCommand { get; private set; }
         public ObservableCollection<SshProfile> SshProfiles { get; private set; }
-        public ObservableCollection<SshConnectionStatus> PublicLog { get; private set; }
-        public ObservableCollection<SshConnectionStatus> SuccessLog { get; private set; }
-        public ObservableCollection<SshConnectionStatus> OutputLog { get; private set; }
+        public ObservableCollection<SshConnectionStatusEventArgs> PublicLog { get; private set; }
+        public ObservableCollection<SshConnectionStatusEventArgs> SuccessLog { get; private set; }
+        public ObservableCollection<SshConnectionStatusEventArgs> OutputLog { get; private set; }
         public SshProfile SelectedProfile { get; set; }
         public bool IsFinished
         {
@@ -90,9 +90,9 @@ namespace PA.SSH.Wpf.ViewModels
             IsCanceled = false;
             IsRunning = false;
             SshProfiles = new ObservableCollection<SshProfile>();
-            PublicLog = new ObservableCollection<SshConnectionStatus>();
-            SuccessLog = new ObservableCollection<SshConnectionStatus>();
-            OutputLog = new ObservableCollection<SshConnectionStatus>();
+            PublicLog = new ObservableCollection<SshConnectionStatusEventArgs>();
+            SuccessLog = new ObservableCollection<SshConnectionStatusEventArgs>();
+            OutputLog = new ObservableCollection<SshConnectionStatusEventArgs>();
             LoadCommand = new DelegateCommand(LoadProfiles, () => true);
             SaveAsProfilesCommand = new DelegateCommand(SaveAsProfiles, () => true);
             RemoveCommand = new DelegateCommand(Remove, () => true);
@@ -124,45 +124,46 @@ namespace PA.SSH.Wpf.ViewModels
             IsCanceled = false;
             IsRunning = true;
             checkers = new List<SshConnectionChecker>();
-            var cts = new CancellationTokenSource();
+           var cts = new CancellationTokenSource();
             ParallelOptions po = new ParallelOptions();
             po.CancellationToken = cts.Token;
-            po.MaxDegreeOfParallelism = 16; //System.Environment.ProcessorCount;
+            po.MaxDegreeOfParallelism = System.Environment.ProcessorCount;
             ParallelLoopResult result;
 
             try
             {
                 object locker = new object();
-                result = Parallel.ForEach(SshProfiles, po, (prof, state) =>
+                Parallel.ForEach(SshProfiles,po, profile =>  
                 {
-                    //lock (locker)
-                    //{
-                    //    //progressInfo.curentWorkingThreads++;
-                    //}
-
-
-                    //lock (locker)
-                    //{
-                    //    //progressInfo.curentWorkingThreads--;
-                    //    //progressInfo.lastCheckedIP = ip;
-                    //    //progressInfo.totalCheckedIPInCurIPRange++;
-                    //    //progressInfo.totalCheckedIP++;
-                    //}
-                    if (IsCanceled)
+                    lock (locker)
                     {
-                        IsRunning = false;
-                        state.Stop();
+                       // curentWorkingThreads++;
                     }
+
+
+                    ////lock (locker)
+                    ////{
+                    ////    //progressInfo.curentWorkingThreads--;
+                    ////    //progressInfo.lastCheckedIP = ip;
+                    ////    //progressInfo.totalCheckedIPInCurIPRange++;
+                    ////    //progressInfo.totalCheckedIP++;
+                    ////}
+                    ///
+
+                    //if (IsCanceled)
+                    //{
+                    //    IsRunning = false;
+                    //    break;
+                    //}
                     connectionChecker = new SshConnectionChecker();
                     connectionChecker.AnyPort = RunAsAnyPortMethod;
                     connectionChecker.Passed += ConnectionChecker_Passed;
                     connectionChecker.LogChanged += ConnectionChecker_LogChanged;
-                    connectionChecker.Profile = prof;
+                    connectionChecker.Profile = profile;
                     connectionChecker.ConnectAsync();
                     checkers.Add(connectionChecker);
                     //Thread.Sleep(1);
-                }
-                );
+                });
             }
             catch(Exception ex) 
             {
@@ -193,7 +194,7 @@ namespace PA.SSH.Wpf.ViewModels
                 RaisePropertyChanged("IsFinished");
             }
         }
-        private void ConnectionChecker_LogChanged(object sender, SshConnectionStatus e)
+        private void ConnectionChecker_LogChanged(object sender, SshConnectionStatusEventArgs e)
         {
             switch (e.Type)
             {
@@ -201,6 +202,7 @@ namespace PA.SSH.Wpf.ViewModels
                     App.Current.Dispatcher.Invoke((Action)delegate
                     {
                         OutputLog.Add(e);
+                        SuccessLog.Add(e);
                     });
                     break;
                 case StatusType.PingOK:
@@ -249,9 +251,9 @@ namespace PA.SSH.Wpf.ViewModels
             string[] lines = new string[OutputLog.Count()];
             int i = 0;
             var MySource = CollectionViewSource.GetDefaultView(OutputLog);
-            foreach (SshConnectionStatus scs in MySource.OfType<SshConnectionStatus>())
+            foreach (SshConnectionStatusEventArgs scs in MySource.OfType<SshConnectionStatusEventArgs>())
             {
-                lines[i++] = string.Format("{0},{1},{2},{3},{4},{5},Ping : {6}, Response : {7}ms", scs.Profile?.Provider ?? "", scs.Profile?.ValidationDays ?? 0, scs.Profile?.HostAddress ?? "", scs.Profile?.Location ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration.TotalMilliseconds);
+                lines[i++] = string.Format("{0},{1},{2},{3},{4},{5},Ping : {6}, Response : {7}ms", scs.Profile?.Provider ?? "", scs.Profile?.ValidationDays ?? 0, scs.Profile?.HostAddress ?? "", scs.Profile?.Location ?? "", scs.Server, scs.Port, scs.PingAvrage, scs.Duration);
             }
             SaveFileDialog dlg = new SaveFileDialog();
             dlg.Filter = "Text Files|*.txt";

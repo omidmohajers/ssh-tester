@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31613.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PA.SSH", "PA.SSH\PA.SSH.csproj", "{A1F5A216-A6A3-47C3-9922-D092C80341B1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PA.SSH.Wpf", "PA.SSH.Wpf\PA.SSH.Wpf.csproj", "{9BC0852E-846D-4280-8165-E095AE1DE48F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PA.Ssh.v2", "PA.Ssh.v2\PA.Ssh.v2.csproj", "{CBD0C6F1-6C15-4F12-AF9C-4D24A8EAD691}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PA.Ssh.v2", "PA.Ssh.v2\PA.Ssh.v2.csproj", "{CBD0C6F1-6C15-4F12-AF9C-4D24A8EAD691}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PA.Ssh.Console", "PA.Ssh.Console\PA.Ssh.Console.csproj", "{1A110E47-51D4-4C0E-9B0D-DC1F1D7A5EB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PA.Ssh.Console", "PA.Ssh.Console\PA.Ssh.Console.csproj", "{1A110E47-51D4-4C0E-9B0D-DC1F1D7A5EB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testcommad", "testcommad\testcommad.csproj", "{E6C88D47-7CF7-4EE8-9F75-33E5E4C51343}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{1A110E47-51D4-4C0E-9B0D-DC1F1D7A5EB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A110E47-51D4-4C0E-9B0D-DC1F1D7A5EB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A110E47-51D4-4C0E-9B0D-DC1F1D7A5EB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6C88D47-7CF7-4EE8-9F75-33E5E4C51343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6C88D47-7CF7-4EE8-9F75-33E5E4C51343}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6C88D47-7CF7-4EE8-9F75-33E5E4C51343}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6C88D47-7CF7-4EE8-9F75-33E5E4C51343}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

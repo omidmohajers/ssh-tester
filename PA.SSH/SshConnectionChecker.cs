@@ -1,6 +1,4 @@
-﻿using Renci.SshNet;
-using Renci.SshNet.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,26 +6,26 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Navigation;
 
 namespace PA.SSH
 {
     public class SshConnectionChecker
     {
-        private Stopwatch watcher;
         private bool finished = false;
         public SshProfile Profile { get; set; }
-        public List<SshConnectionStatus> Log { get; private set; }
+        public List<SshConnectionStatusEventArgs> Log { get; private set; }
         public bool AnyPort { get; set; }
         public string LastMessage { get; private set; }
         public bool IsCanceled { get; private set; }
 
-        public event EventHandler<SshConnectionStatus> LogChanged = null;
+        public event EventHandler<SshConnectionStatusEventArgs> LogChanged = null;
         public event EventHandler<EventArgs> Passed = null;
         public SshConnectionChecker()
         {
-            Log = new List<SshConnectionStatus>();
+            Log = new List<SshConnectionStatusEventArgs>();
         }
-        public void AddLog(SshConnectionStatus e)
+        public void AddLog(SshConnectionStatusEventArgs e)
         {
             Log.Add(e);
             Application.Current.Dispatcher.Invoke((Action)delegate
@@ -40,53 +38,56 @@ namespace PA.SSH
         {
             await Task.Run(() =>
             {
-                SshClient client = new SshClient(server, port, username, password);
-                client.ConnectionInfo.Timeout = TimeSpan.FromSeconds(5);
-                client.ErrorOccurred += Client_ErrorOccurred;
-                client.HostKeyReceived += Client_HostKeyReceived;
-                watcher = new Stopwatch();
+                SshClient client = new SshClient(
+                    server,
+                    port,
+                    username,
+                    password);
+                client.ProcessSucceed += Client_DataReceived;
+                client.ProcessFailed += Client_ProcessFailed;
+               // client.ConnectionInfo.Timeout = TimeSpan.FromSeconds(5);
+              //  client.ErrorOccurred += Client_ErrorOccurred;
+              //  client.HostKeyReceived += Client_HostKeyReceived;
                 try
                 {
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(
                         Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
+                        client.Server,
+                        (ushort)client.Port,
                         DateTime.Now,
                         "Connecting...",
                         null,
-                        TimeSpan.Zero,
+                        0,
                          StatusType.Message,
                          0
                         );
                     AddLog(state);
                     if (IsCanceled)
                         return;
-                    watcher.Start();
                     client.SayHello();
-                    watcher.Stop();
-                    state = new SshConnectionStatus(
-                        Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
-                        DateTime.Now,
-                        "Connected!",
-                        null,
-                        watcher.Elapsed,
-                         StatusType.Done,
-                         Profile.PingAvrage
-                        );
-                    AddLog(state);
+                   //
+                    //state = new SshConnectionStatusEventArgs(
+                    //    Profile,
+                    //    client.Server,
+                    //    (ushort)client.Port,
+                    //    DateTime.Now,
+                    //    "Connected!",
+                    //    null,
+                    //    0,
+                    //     StatusType.Done,
+                    //     Profile.PingAvrage
+                    //    );
+                    //AddLog(state);
                 }
                 catch (System.ObjectDisposedException)
                 {
-                    watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
+                    SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(Profile,
+                        client.Server,
+                        (ushort)client.Port,
                         DateTime.Now,
                         "The method was called after the client was disposed.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -94,15 +95,13 @@ namespace PA.SSH
                 }
                 catch (System.InvalidOperationException)
                 {
-                    watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(
                         Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
+                        client.Server, (ushort)client.Port,
                         DateTime.Now,
                         "The client is already connected.",
                         null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -110,75 +109,12 @@ namespace PA.SSH
                 }
                 catch (System.Net.Sockets.SocketException)
                 {
-                    watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
+                    SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(Profile,
+                        client.Server, (ushort)client.Port,
                         DateTime.Now,
                         "Socket connection to the SSH server or proxy server could not be established, or an error occurred while resolving the hostname.",
                         null,
-                        watcher.Elapsed,
-                         StatusType.Exception,
-                         0
-                        );
-                    AddLog(state);
-                }
-                catch (Renci.SshNet.Common.SshConnectionException)
-                {
-                    watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
-                        DateTime.Now,
-                        "SSH session could not be established.",
-                        null,
-                        watcher.Elapsed,
-                         StatusType.Exception,
-                         0
-                        );
-                    AddLog(state);
-                }
-                catch (Renci.SshNet.Common.SshAuthenticationException)
-                {
-                    watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
-                        DateTime.Now,
-                        "Authentication of SSH session failed.",
-                        null,
-                        watcher.Elapsed,
-                         StatusType.ReplyButNoAthenticate,
-                         0
-                        );
-                    AddLog(state);
-                }
-                catch (Renci.SshNet.Common.ProxyException)
-                {
-                    watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
-                        DateTime.Now,
-                        "Failed to establish proxy connection.",
-                        null,
-                        watcher.Elapsed,
-                         StatusType.Exception,
-                         0
-                        );
-                    AddLog(state);
-                }
-                catch (Exception ex)
-                {
-                    watcher.Stop();
-                    SshConnectionStatus state = new SshConnectionStatus(
-                        Profile,
-                        client.ConnectionInfo.Host,
-                        (ushort)client.ConnectionInfo.Port,
-                        DateTime.Now,
-                        ex.Message,
-                        null,
-                        watcher.Elapsed,
+                        0,
                          StatusType.Exception,
                          0
                         );
@@ -186,35 +122,42 @@ namespace PA.SSH
                 }
                 finally
                 {
-                    watcher = null;
-                    if (client.IsConnected)
-                        client.Disconnect();
+                    //if (client.IsConnected)
+                    //    client.Disconnect();
                 }
             });
 
         }
 
-        public void CancelOperation()
+        private void Client_ProcessFailed(object sender, EventArgs e)
         {
-            IsCanceled = true;
+            SshClient client = sender as SshClient;
+            SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(
+                Profile,
+                client.Server,
+                (ushort)client.Port,
+                DateTime.Now,
+                client.Data,
+                null,
+                client.ResponseTime,
+                 StatusType.Error,
+                 Profile.PingAvrage
+                );
+            AddLog(state);
+            finished = AnyPort;
         }
 
-        private void Client_HostKeyReceived(object sender, HostKeyEventArgs e)
+        private void Client_DataReceived(object sender, EventArgs e)
         {
-            watcher.Stop();
             SshClient client = sender as SshClient;
-            SshConnectionStatus state = new SshConnectionStatus(
+            SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(
                 Profile,
-                client.ConnectionInfo.Host,
-                (ushort)client.ConnectionInfo.Port,
+                client.Server,
+                (ushort)client.Port,
                 DateTime.Now,
-                string.Format("{0}\nHost Key Received : \nFingerPrint: {1} \nHostKey : {2} \nHostKey Name : {3}"
-                                , Profile
-                                , string.Join(",", e.FingerPrint)
-                                , string.Join(",", e.HostKey)
-                                , e.HostKeyName),
-                e.FingerPrint,
-                watcher.Elapsed,
+                client.Data,
+                null,
+                client.ResponseTime,
                  StatusType.Done,
                  Profile.PingAvrage
                 );
@@ -222,21 +165,26 @@ namespace PA.SSH
             finished = AnyPort;
         }
 
-        private void Client_ErrorOccurred(object sender, ExceptionEventArgs e)
+        public void CancelOperation()
         {
-            SshClient client = sender as SshClient;
-            SshConnectionStatus state = new SshConnectionStatus(Profile,
-                client.ConnectionInfo.Host,
-                (ushort)client.ConnectionInfo.Port,
-                DateTime.Now,
-                string.Format("Error Received : {0}", e.Exception.Message),
-                null,
-                TimeSpan.Zero,
-                StatusType.Error,
-                0
-            );
-            AddLog(state);
+            IsCanceled = true;
         }
+
+        //private void Client_ErrorOccurred(object sender, ExceptionEventArgs e)
+        //{
+        //    SshClient client = sender as SshClient;
+        //    SshConnectionStatusEventArgs state = new SshConnectionStatus(Profile,
+        //        client.ConnectionInfo.Host,
+        //        (ushort)client.ConnectionInfo.Port,
+        //        DateTime.Now,
+        //        string.Format("Error Received : {0}", e.Exception.Message),
+        //        null,
+        //        0,
+        //        StatusType.Error,
+        //        0
+        //    );
+        //    AddLog(state);
+        //}
 
         public async void ConnectAsync()
         {
@@ -266,6 +214,7 @@ namespace PA.SSH
                 Ping ping = new Ping();
                 int done = 0;
                 long pingAvrg = 0;
+
                 StringBuilder sb = new StringBuilder().AppendLine(Profile.Fullname);
                 for (int i = 0; i < 4; i++)
                 {
@@ -282,14 +231,14 @@ namespace PA.SSH
                 {
                     pingAvrg /= done;
                     Profile.PingAvrage = pingAvrg;
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(
                         Profile,
                         address,
                         (ushort)0,
                         DateTime.Now,
                         sb.AppendLine("Ping result is OK :)").ToString(),
                         null,
-                        TimeSpan.Zero,
+                        0,
                         StatusType.PingOK,
                         Profile.PingAvrage
                         );
@@ -299,14 +248,14 @@ namespace PA.SSH
                 }
                 else
                 {
-                    SshConnectionStatus state = new SshConnectionStatus(
+                    SshConnectionStatusEventArgs state = new SshConnectionStatusEventArgs(
                         Profile,
                         address,
                         (ushort)0,
                         DateTime.Now,
                         sb.AppendLine("Ping result is not OK :(").ToString(),
                         null,
-                        TimeSpan.Zero,
+                        0,
                         StatusType.PingError,
                         0
                         );
